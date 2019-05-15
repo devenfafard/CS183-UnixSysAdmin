@@ -2,6 +2,7 @@
 
 import sys
 import os
+import re
 
 # Check to see if hourlyInfo.txt exists. If not, 
 # create it in the current directory.
@@ -26,16 +27,25 @@ args = sys.argv[1:]
 for arg in args:
      log_file = open(arg, "r")
      lines = log_file.readlines()
+     # length = len(lines)
+     # print(str(length))
+         
+     for x in range(1, 61):
+          quarantine_count = 0
+          reject_count = 0
 
-     for line in lines:
-          print(line[11])
+          for line in lines:
+               # Convert characters to minute int              
+               minute = (ord(line[11])*10) + ord(line[12])
+               print(str(minute))
+               if(minute == x):
+                    if(re.search('quarantine', line)):
+                         quarantine_count += 1
+
+                    elif(re.search("reject", line)):
+                         reject_count += 1
+
+#          print("For minute " + str(minute) + ": Q = " + str(quarantine_count) + " R = " + str(reject_count))
           
 
-     f.close()
-
-# For each line in hourlyInfo.txt, parse lines matching each minute
-# If they contain the word 'quarantine' or 'reject' increment a counter
-
-quarantine_count = 0
-reject_count = 0
-minute_count = 0; 
+     log_file.close()
