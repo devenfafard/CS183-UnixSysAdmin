@@ -4,7 +4,7 @@ import sys
 import os
 
 directory_path = os.path.dirname(os.path.realpath(__file__))
-full_path = directory_path + "/log4"
+full_path = directory_path + "/log4444"
 
 log_file_exists = os.path.isfile(full_path)
 
@@ -15,35 +15,38 @@ if log_file_exists:
 	to_set = set()
 	from_set = set()
 	ip_set = set()
-	reject_set()
+	total_rejects = 0
 
 	for line in lines:
-		# Check for "to" addresses
-		if ("to=<" in line):
-			split_lines = line.split("to=<")
-			fully_split = split_lines.split(">")
+		if " blocked using dnsbl.sorbs.net;" in line:
+			total_rejects += 1
 
-			if(not fully_split[0] in to_set):
-				to_set.add(fully_split[0])
+			# Parse for IP addresses
+			if " Client host [" in line:
+				split_lines = line.split("Client host [")
+				fully_split = split_lines[1].split("]")
 
-		# Check for "from" addresses	
-		if (from=<" in line):
-			split_lines = line.split("from=<")
-			fully_split = split_lines.split(">")
+				if not fully_split[0] in ip_set:
+					ip_set.add(fully_split[0])
 
-			if(not fully_split[0] in from_set):
-				from_set.add(fully_split[0])
+			# Parse for from address
+			if " from=<" in line:
+				split_lines = line.split("from=<")
+				fully_split = split_lines[1].split(">")
 
-		# Check for rejected IP addresses based on dnsbl.sorbs.net
-		if ("dnsbl.sorbs.net" in line):
-			split_lines = line.split("Client host [")
-			fully_split = split_lines.split("]")
+				if(not fully_split[0] in from_set):  	
+					from_set.add(fully_split[0])
 
-			if(not fully_split[0] in reject_set):
-				reject_set.add(fully_split[0])"
+			# Check for "to" addresses
+			if ("to=<" in line):
+				split_lines = line.split("to=<")
+				fully_split = split_lines[1].split(">")
 
-		# Check for unique IP addresses 
-		split_lines = line.split("[")
-			fully_split = split_lines.split("]")
-			for x in fully_split:
-				print(x)
+				if(not fully_split[0] in to_set):
+					to_set.add(fully_split[0])
+
+	print(str(total_rejects) + " messages rejected")
+	print(str(len(ip_set)) + " unique IP's")
+	print(str(len(from_set)) + " unique from addresses")
+	print(str(len(to_set)) + " unique to addresses")
+	
